@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14100c">
+<title>MOHAMMED · Mobilia (concept)</title>
+<meta name="description" content="Concept project: a live 3D furniture gallery where the sun moves as you scroll, every piece builds itself and can be re-dressed in real time. Fictional brand, designed and developed by Muhammed Elhuseyin.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="MOHAMMED · Mobilia (concept)">
+<meta property="og:description" content="A day inside the arches: a live 3D furniture gallery with a moving sun, self-building pieces and a real-time configurator.">
+<meta property="og:image" content="https://housinasaad-creator.github.io/mohammed-furniture-site/assets/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://housinasaad-creator.github.io/mohammed-furniture-site/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%2314100c'/%3E%3Cg transform='translate(14 29) scale(.62)'%3E%3Cpath fill='%23cba24f' fill-rule='evenodd' d='M0 60V32.5A32.5 32.5 0 0 1 56.5 10.6A32.5 32.5 0 0 1 113 32.5V60ZM17 60V32.5A15.5 15.5 0 0 1 48 32.5V60ZM65 60V32.5A15.5 15.5 0 0 1 96 32.5V60Z'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Manrope:wght@400;500;600;700&family=Reem+Kufi:wght@500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<script type="importmap">{ "imports": { "three": "./js/vendor/three.module.min.js" } }</script>
+<link rel="stylesheet" href="css/store.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/site.css">
+</head>
+<body class="is-loading">
+
+<canvas id="gl" aria-hidden="true"></canvas>
+<div class="scrim" id="scrim" aria-hidden="true"></div>
+
+<div class="loader" id="loader" aria-hidden="true">
+  <svg class="loader-mark" viewBox="0 0 113 60" aria-hidden="true"><path id="loaderPath" d="M0 60V32.5A32.5 32.5 0 0 1 56.5 10.6A32.5 32.5 0 0 1 113 32.5V60ZM17 60V32.5A15.5 15.5 0 0 1 48 32.5V60ZM65 60V32.5A15.5 15.5 0 0 1 96 32.5V60Z" fill="none" stroke="#cba24f" stroke-width="1.6" stroke-linejoin="round" pathLength="1"/></svg>
+  <p class="loader-txt" id="loaderTxt" data-i="loader"></p>
+  <div class="loader-bar"><i id="loaderBar"></i></div>
+</div>
+
+<header class="hdr" id="hdr">
+  <a class="logo" href="#top" aria-label="Mohammed">
+    <svg class="logo-m" viewBox="0 0 113 60" aria-hidden="true"><path fill="url(#brass)" fill-rule="evenodd" d="M0 60V32.5A32.5 32.5 0 0 1 56.5 10.6A32.5 32.5 0 0 1 113 32.5V60ZM17 60V32.5A15.5 15.5 0 0 1 48 32.5V60ZM65 60V32.5A15.5 15.5 0 0 1 96 32.5V60Z"/></svg>
+    <span class="logo-word" id="brand" data-i="brand"></span>
+  </a>
+  <nav class="nav" id="nav">
+    <a href="#top" data-i="nav.home"></a>
+    <a href="#collection" data-i="nav.collection"></a>
+    <a href="#craft" data-i="nav.craft"></a>
+    <a href="#voices" data-i="nav.voices"></a>
+  </nav>
+  <div class="hdr-actions">
+    <button class="icon-btn sound" id="soundBtn" type="button" aria-label="Sound" aria-pressed="false" data-cursor="sound">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path class="w1" d="M16 9a4 4 0 0 1 0 6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path class="w2" d="M18.5 6.5a8 8 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path class="off" d="M17 9l5 6M22 9l-5 6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </button>
+    <div class="langs" id="langs" role="group" aria-label="Language">
+      <button type="button" data-l="en">EN</button><button type="button" data-l="tr">TR</button><button type="button" data-l="ar">AR</button>
+    </div>
+    <button class="bag" id="bag" type="button" aria-label="Bag">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <b id="bagCount">0</b>
+    </button>
+  </div>
+</header>
+
+<main id="top">
+  <!-- ============ الهيرو: يوم كامل في خمس وقفات ============ -->
+  <section class="hero" id="hero" aria-label="Story">
+    <div class="chapters" id="chapters"></div>
+    <div class="clock" id="clock" aria-hidden="true">
+      <svg class="clock-arc" viewBox="0 0 200 110"><defs><linearGradient id="arcg" x1="0" x2="1"><stop offset="0" stop-color="#7f93d8"/><stop offset=".25" stop-color="#ffb072"/><stop offset=".5" stop-color="#ffe9b8"/><stop offset=".75" stop-color="#ff9a5a"/><stop offset="1" stop-color="#6b79c4"/></linearGradient></defs>
+        <path d="M10 100A90 90 0 0 1 190 100" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="2" stroke-linecap="round"/>
+        <path d="M10 100A90 90 0 0 1 190 100" fill="none" stroke="url(#arcg)" stroke-width="3" stroke-linecap="round" opacity=".9"/>
+        <circle id="clockSun" cx="10" cy="100" r="7" fill="#fff4d6"/></svg>
+      <b id="clockT">05:45</b>
+    </div>
+    <nav class="dots" id="dots" aria-label="Chapters"></nav>
+    <div class="cue" id="cue" aria-hidden="true"><i></i><span data-i="scrollCue"></span></div>
+    <button class="sound-tip" id="soundTip" type="button" data-i="soundTip" data-cursor="sound"></button>
+    <div class="progress" aria-hidden="true"><i id="progressBar"></i></div>
+  </section>
+
+  <!-- ============ المجموعة: متجر حيّ ============ -->
+  <section class="shop" id="collection">
+    <header class="shop-head">
+      <p class="kicker" data-i="shop.k"></p>
+      <h2 class="h2" data-i="shop.t"></h2>
+      <p class="lead" data-i="shop.s"></p>
+    </header>
+
+    <aside class="panel" id="panel" aria-live="polite">
+      <div class="panel-in" id="panelIn">
+        <p class="tag" id="pTag"></p>
+        <h3 class="pname" id="pName"></h3>
+        <p class="pdesc" id="pDesc"></p>
+        <div class="opts" id="pOpts"></div>
+        <div class="cta">
+          <div class="buy">
+            <div class="price"><b id="pPrice"></b><small id="pEach"></small></div>
+            <div class="qty" aria-label="Quantity">
+              <button type="button" id="qMinus" aria-label="-">−</button><b id="qVal">1</b><button type="button" id="qPlus" aria-label="+">+</button>
+            </div>
+          </div>
+          <button class="btn add" id="addBtn" type="button"><span id="addTxt"></span></button>
+          <p class="ship" data-i="shop.ship"></p>
+        </div>
+      </div>
+    </aside>
+
+    <nav class="carousel" id="carousel" aria-label="Collection"></nav>
+
+    <div class="tools" id="tools">
+      <div class="tool" data-tool="style">
+        <button class="tool-b" type="button" aria-haspopup="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.2 0 1.8-.8 1.8-1.7 0-1-.7-1.5-.7-2.4 0-.9.7-1.6 1.7-1.6H17a4 4 0 0 0 4-4C21 6.7 17 3 12 3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="7.5" cy="11" r="1.1" fill="currentColor"/><circle cx="10.5" cy="7.2" r="1.1" fill="currentColor"/><circle cx="15" cy="7.4" r="1.1" fill="currentColor"/></svg>
+          <span data-i="shop.tools.style"></span>
+        </button>
+        <div class="tpop"><p class="tpop-t" data-i="shop.styleTip"></p><div class="styles" id="styles"></div></div>
+      </div>
+      <div class="tool" data-tool="light">
+        <button class="tool-b" type="button" aria-haspopup="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5.3 5.3l1.7 1.7M17 17l1.7 1.7M5.3 18.7L7 17M17 7l1.7-1.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <span data-i="shop.tools.light"></span>
+        </button>
+        <div class="tpop tpop-light"><p class="tpop-t" data-i="shop.lightTip"></p>
+          <div class="light-row"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" fill="currentColor"/></svg><input id="hourR" type="range" min="0" max="24" step="0.05" value="11" aria-label="Time of day"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="currentColor"/></svg></div>
+          <b class="hour-t" id="hourT">11:00</b>
+        </div>
+      </div>
+      <button class="tool-b" id="anatomyBtn" type="button" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9 4.5-9 4.5-9-4.5L12 3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 12l9 4.5 9-4.5M3 16.5L12 21l9-4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <span data-i="shop.tools.anatomy"></span>
+      </button>
+      <button class="tool-b" id="dimsBtn" type="button" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 15.5L15.5 3 21 8.5 8.5 21 3 15.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M7 12l2.2 2.2M10 9l1.6 1.6M13 6l2.2 2.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span data-i="shop.tools.dims"></span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ============ الصنعة ============ -->
+  <section class="sec craft" id="craft">
+    <div class="wrap">
+      <header class="sec-head rv">
+        <p class="kicker" data-i="craft.k"></p>
+        <h2 class="h2" data-i="craft.t"></h2>
+        <p class="lead" data-i="craft.s"></p>
+      </header>
+      <ol class="steps" id="steps"></ol>
+    </div>
+  </section>
+
+  <!-- ============ آراء: بطاقات عيّنات القماش ============ -->
+  <section class="sec voices" id="voices">
+    <div class="wrap">
+      <header class="sec-head rv">
+        <p class="kicker" data-i="voices.k"></p>
+        <h2 class="h2" data-i="voices.t"></h2>
+        <p class="lead" data-i="voices.s"></p>
+      </header>
+    </div>
+    <div class="swatches" id="swatches"></div>
+  </section>
+
+  <!-- ============ لأصحاب مصانع الأثاث ============ -->
+  <section class="sec makers" id="makers">
+    <div class="wrap">
+      <header class="sec-head rv">
+        <p class="kicker" data-i="makers.k"></p>
+        <h2 class="h2" data-i="makers.t"></h2>
+        <p class="lead" data-i="makers.s"></p>
+      </header>
+      <div class="mk-grid" id="mkGrid"></div>
+      <a class="btn mk-cta rv" id="mkCta" href="#" target="_blank" rel="noopener" hidden><span data-i="makers.cta"></span></a>
+    </div>
+  </section>
+
+  <section class="sec contact" id="contact">
+    <div class="wrap contact-grid">
+      <header class="sec-head rv">
+        <p class="kicker" data-i="contact.k"></p>
+        <h2 class="h2" data-i="contact.t"></h2>
+        <p class="lead" data-i="contact.s"></p>
+      </header>
+      <form class="mail rv" id="mail" autocomplete="off">
+        <input id="mailIn" class="field" type="email" required aria-label="email">
+        <button class="btn" type="submit"><span id="mailBtn" data-i="contact.btn"></span></button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer class="ftr">
+  <div class="wrap ftr-grid">
+    <div class="ftr-brand"><svg class="logo-m" viewBox="0 0 113 60" aria-hidden="true"><path fill="url(#brass)" fill-rule="evenodd" d="M0 60V32.5A32.5 32.5 0 0 1 56.5 10.6A32.5 32.5 0 0 1 113 32.5V60ZM17 60V32.5A15.5 15.5 0 0 1 48 32.5V60ZM65 60V32.5A15.5 15.5 0 0 1 96 32.5V60Z"/></svg><span class="logo-word" data-i="brand"></span></div>
+    <p class="ftr-made" data-i="footer.made"></p>
+    <p class="ftr-note" data-i="footer.concept"></p>
+    <p class="ftr-rights" data-i="footer.rights"></p>
+  </div>
+</footer>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs><linearGradient id="brass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f0d38a"/><stop offset=".5" stop-color="#cba24f"/><stop offset="1" stop-color="#8e6a2a"/></linearGradient></defs>
+</svg>
+
+<!-- مسمّيات التشريح + أبعاد (طبقات فوق المشهد) -->
+<div class="labels" id="labels" aria-hidden="true"></div>
+<svg class="dims" id="dims" aria-hidden="true"></svg>
+
+<!-- ============ الحقيبة ============ -->
+<div class="scrim-cart" id="cartScrim"></div>
+<aside class="drawer" id="cart" aria-label="Bag" aria-hidden="true">
+  <header class="drawer-h"><h3 id="cartTitle"></h3><button class="x" id="cartClose" type="button" aria-label="Close">×</button></header>
+  <div class="drawer-body" id="cartBody"></div>
+  <footer class="drawer-f" id="cartFoot"></footer>
+</aside>
+
+<!-- ============ إتمام الشراء ============ -->
+<div class="modal" id="checkout" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="modal-in">
+    <button class="x modal-x" id="coClose" type="button" aria-label="Close">×</button>
+    <div class="co-main">
+      <ol class="co-steps" id="coSteps"></ol>
+      <div class="co-demo" id="coDemo"></div>
+      <div class="co-pane" id="coPane"></div>
+    </div>
+    <aside class="co-side" id="coSide"></aside>
+  </div>
+</div>
+
+<div class="fly-layer" id="flyLayer" aria-hidden="true"></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+  if (location.protocol === 'file:') {
+    document.addEventListener('DOMContentLoaded', function () {
+      var d = document.createElement('div');
+      d.style.cssText = 'position:fixed;inset:0;z-index:999;display:grid;place-content:center;gap:12px;padding:30px;text-align:center;background:#14100c;color:#f7efe0;font:600 18px/1.6 system-ui,sans-serif';
+      d.innerHTML = '<div style="font-size:42px">🏛️</div><div>This page needs a local server (it uses 3D modules).</div><div style="color:#cdb892;font-weight:500">Double-click <b>run-site.bat</b> in the project folder, or open the published link.</div>';
+      document.body.appendChild(d);
+    });
+  }
+</script>
+<script src="js/content.js"></script>
+<script type="module" src="js/app.js"></script>
+<script src="js/cursor.js"></script>
+</body>
+</html>

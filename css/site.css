@@ -1,0 +1,32 @@
+/* تعديلات خاصة بالموقع فوق متجر السلة المنقول: صور القطع بلقطات حقيقية + مؤشر الماوس */
+.ci-img { background: #d8ccb6; width: 84px; height: 84px; }
+.ci { grid-template-columns: 84px 1fr auto; }
+.ci-img img, .si .ci-img img, .fly img { transform: none; width: 100%; height: 100%; object-fit: cover; }
+.si { grid-template-columns: 58px 1fr auto; } .si .ci-img { width: 58px; height: 58px; border-radius: 12px; }
+.fly { background: #d8ccb6; width: 96px; height: 96px; margin: -48px 0 0 -48px; }
+.ci h4, .si h4 { font-size: 1.2rem; }
+.btn { background: linear-gradient(135deg, #f0d38a, var(--accent)); box-shadow: 0 14px 38px rgba(var(--accent-rgb), .35); }
+.btn::after { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, .5) 50%, transparent 70%); transform: translateX(-120%); transition: transform .8s var(--ease); }
+.btn:hover::after { transform: translateX(120%); }
+.field { background: rgba(255, 255, 255, .05); }
+.free-bar i s { background: linear-gradient(90deg, #8e6a2a, #f0d38a); }
+.co-proc { display: grid; place-items: center; gap: 18px; text-align: center; padding: 60px 0; color: var(--muted); }
+.co-proc .loader-m { filter: drop-shadow(0 0 18px rgba(203, 162, 79, .6)); animation: flick 1.4s ease-in-out infinite; }
+.seal .disc circle:first-child { fill: #6b2f1c; }
+
+/* مؤشر الماوس */
+html.has-cur, html.has-cur * { cursor: none !important; }
+html.has-cur input, html.has-cur textarea { cursor: text !important; }
+.cur-core { position: fixed; left: 0; top: 0; z-index: 9999; pointer-events: none; width: 26px; height: 14px; margin: -7px 0 0 -13px; opacity: 0; transition: opacity .3s, scale .25s; filter: drop-shadow(0 0 8px rgba(240, 211, 138, .8)); will-change: transform; }
+.cur-core svg { width: 100%; height: 100%; }
+.cur-ring { position: fixed; left: 0; top: 0; z-index: 9998; pointer-events: none; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; border: 1.5px solid rgba(240, 211, 138, .7); opacity: 0; display: grid; place-items: center; transition: width .3s var(--ease), height .3s var(--ease), margin .3s var(--ease), background .3s, border-color .3s, opacity .3s; will-change: transform; }
+.cur-ring span { font: 800 .62rem var(--sans); letter-spacing: .1em; text-transform: uppercase; color: #1c1208; opacity: 0; transition: opacity .2s; white-space: nowrap; }
+.cur-fx { position: fixed; inset: 0; z-index: 9990; pointer-events: none; }
+html.cur-on .cur-core, html.cur-on .cur-ring { opacity: 1; }
+html.cur-hot .cur-ring { width: 64px; height: 64px; margin: -32px 0 0 -32px; background: rgba(240, 211, 138, .16); border-color: var(--accent); }
+html.cur-label .cur-ring { width: 76px; height: 76px; margin: -38px 0 0 -38px; background: linear-gradient(135deg, #f0d38a, var(--accent)); border-color: transparent; }
+html.cur-label .cur-ring span { opacity: 1; }
+html.cur-label .cur-core { opacity: 0; }
+html.cur-txt .cur-core, html.cur-txt .cur-ring { opacity: 0; }
+html.cur-down .cur-ring { width: 36px; height: 36px; margin: -18px 0 0 -18px; }
+@keyframes flick { 0%, 100% { transform: scale(1) rotate(-1deg); } 50% { transform: scale(1.06); } }
