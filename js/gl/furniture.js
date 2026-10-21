@@ -248,7 +248,7 @@ export class CoffeeTable extends Product {
 }
 
 /* ==================================================================== كرسي السفرة Courbe */
-function buildChairInto(P, parts, x, z, ry, seedBase) {
+export function buildChairInto(P, parts, x, z, ry, seedBase) {
   const m = P.mats, M = P.M;
   const mk = (part) => { const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = ry; parts[part].add(g); return g; };
   const gL = mk('legs'), gF = mk('frame'), gS = mk('seat'), gB = mk('back');
@@ -290,11 +290,11 @@ export class DiningChair extends Product {
     const gap = (L - 0.2) / per;
     for (let i = 0; i < per; i++) {
       const x = -L / 2 + 0.1 + gap * (i + 0.5);
-      buildChairInto(this, parts, x, W / 2 + 0.1, 0, ++n * 7);
-      buildChairInto(this, parts, x, -W / 2 - 0.1, PI, ++n * 7);
+      buildChairInto(this, parts, x, W / 2 + 0.1, PI, ++n * 7);
+      buildChairInto(this, parts, x, -W / 2 - 0.1, 0, ++n * 7);
     }
-    buildChairInto(this, parts, -L / 2 - 0.22, 0, -PI / 2, ++n * 7);
-    buildChairInto(this, parts, L / 2 + 0.22, 0, PI / 2, ++n * 7);
+    buildChairInto(this, parts, -L / 2 - 0.22, 0, PI / 2, ++n * 7);
+    buildChairInto(this, parts, L / 2 + 0.22, 0, -PI / 2, ++n * 7);
   }
 }
 

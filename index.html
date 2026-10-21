@@ -9,10 +9,7 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="MOHAMMED · Mobilia (concept)">
 <meta property="og:description" content="A day inside the arches: a live 3D furniture gallery with a moving sun, self-building pieces and a real-time configurator.">
-<meta property="og:image" content="https://housinasaad-creator.github.io/mohammed-furniture-site/assets/og.jpg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:url" content="https://housinasaad-creator.github.io/mohammed-furniture-site/">
+<meta property="og:image" content="assets/og.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%2314100c'/%3E%3Cg transform='translate(14 29) scale(.62)'%3E%3Cpath fill='%23cba24f' fill-rule='evenodd' d='M0 60V32.5A32.5 32.5 0 0 1 56.5 10.6A32.5 32.5 0 0 1 113 32.5V60ZM17 60V32.5A15.5 15.5 0 0 1 48 32.5V60ZM65 60V32.5A15.5 15.5 0 0 1 96 32.5V60Z'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,6 +23,11 @@
 <body class="is-loading">
 
 <canvas id="gl" aria-hidden="true"></canvas>
+<!-- الهيرو فيديو مُصوَّر مسبقاً بدقة عالية (js/hero-video.js) فوق الكانفس الحي؛ يختفي عند النزول للمتجر. المشهد الحي (js/gl) محفوظ كاملاً ويعمل بـ ?live3d -->
+<div class="hv-stage" id="hvStage" aria-hidden="true">
+  <picture class="hv-poster"><source media="(max-width: 860px)" srcset="assets/hero/poster-m.webp"><img src="assets/hero/poster.webp" alt="" decoding="async" fetchpriority="high"></picture>
+  <video class="hv" id="hv" muted playsinline preload="none" disablepictureinpicture tabindex="-1"></video>
+</div>
 <div class="scrim" id="scrim" aria-hidden="true"></div>
 
 <div class="loader" id="loader" aria-hidden="true">

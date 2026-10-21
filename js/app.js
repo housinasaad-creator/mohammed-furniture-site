@@ -2,7 +2,8 @@
   الواجهة: ثلاث لغات بدون قلب الاتجاه، نصوص الهيرو والساعة، لوحة القطعة وخياراتها الحيّة، أدوات النمط/الضوء/التفكيك/الأبعاد،
   الإضافة للحقيبة بلقطة حقيقية للقطعة بإعدادها، الصوت. المشهد الثلاثي في js/gl، والمتجر في js/store.js.
 */
-import { Experience, PRODUCT_ORDER } from './gl/experience.js';
+import { Experience, PRODUCT_ORDER, HERO_HOURS } from './gl/experience.js';
+import { sunVec } from './gl/core.js';
 import { Sfx } from './gl/sfx.js';
 import { WOODS, FABRICS, STONES, STYLES } from './gl/data.js';
 import { OPTIONS, unitPrice, configLabel } from './catalog.js';
@@ -36,6 +37,19 @@ const UI = { qty: 1, auto: true, ready: false };
 const sfx = new Sfx();
 let exp = null, store = null;
 const thumbs = {};
+/* هيرو الفيديو: وقفات اليوم الخمس فيديو مُصوَّر مسبقاً (js/hero-video.js)، والمتجر وحده مشهد حي. HV.on=false يعيد الهيرو الحي القديم كاملاً (احتياط) */
+const HV = { on: false, step: 0, pos: 0, expReady: false, noGL: false, home: false };
+let hv = null;
+const lerp = (a, b, t) => a + (b - a) * t;
+const shopTv = () => { const t = clamp(window.scrollY / (innerHeight * 0.9), 0, 1); return t * t * (3 - 2 * t); };
+const goHero = (k) => { if (HV.on && hv) hv.jump(k); else if (exp) exp.goStep(k); };
+const isLocked = () => document.body.classList.contains('is-loading') || document.body.classList.contains('modal-open') || $('#cart').classList.contains('on');
+/* ساعة اليوم من موضع الفيديو: نفس تخفيف اللقطة المصوَّرة (smootherstep ثم smooth) مع ثواني التثبيت في نهاية كل مقطع */
+const SEG_S = [4.2, 4.2, 4.2, 4.0], HOLD_S = [1.0, 1.0, 1.0, 0.6];
+const q5 = (x) => { x = clamp(x, 0, 1); return x * x * x * (x * (x * 6 - 15) + 10); };
+const smo = (t) => t * t * (3 - 2 * t);
+const hourOfPos = (pos) => { const seg = clamp(Math.floor(pos), 0, 3), u = clamp(pos - seg, 0, 1), eff = clamp(u * SEG_S[seg] / (SEG_S[seg] - HOLD_S[seg]), 0, 1); return lerp(HERO_HOURS[seg], HERO_HOURS[seg + 1], smo(q5(eff))); };
+const nightOf = (h) => { const y = sunVec(h).y, t = clamp((y + 0.1) / 0.35, 0, 1); return 1 - t * t * (3 - 2 * t); };
 
 /* ---------------------------------------------------------------- لون التمييز يتبع النمط */
 function setAccent(hex) {
@@ -66,7 +80,7 @@ function renderStatic() {
     return `<article class="chap${i === 0 ? ' brand' : ''}"><p class="k"${dd}>${esc(c.k)}</p><h2${dd}>${esc(c.t)}</h2><p class="s"${dd}>${esc(c.s)}</p>${c.cta ? `<a class="go" href="#collection"${dd}>${esc(c.cta)}</a>` : ''}</article>`;
   }).join('');
   $('#dots').innerHTML = t.dots.map((d, i) => `<button type="button" data-i-dot="${i}" aria-label="${esc(d)}"><span dir="${dirAttr()}">${esc(d)}</span></button>`).join('');
-  $$('#dots button').forEach((b) => b.addEventListener('click', () => { if (exp) exp.goStep(+b.getAttribute('data-i-dot')); }));
+  $$('#dots button').forEach((b) => b.addEventListener('click', () => goHero(+b.getAttribute('data-i-dot'))));
   const go = $('.go', $('#chapters')); go && go.addEventListener('click', (e) => { e.preventDefault(); scrollToShop(); });
   // الكاروسيل
   $('#carousel').innerHTML = PRODUCT_ORDER.map((id) => `<button type="button" class="cc${exp && exp.sel === id ? ' on' : ''}" data-id="${id}" aria-label="${esc(t.products[id].name)}"><div class="th" style="background-image:url('${thumbs[id] || ''}')"></div><span dir="${dirAttr()}">${esc(t.products[id].name)}</span></button>`).join('');
@@ -176,19 +190,30 @@ function toast(msg) { const t = $('#toast'); t.textContent = msg; t.setAttribute
 /* ---------------------------------------------------------------- الهيرو */
 const fmtHour = (h) => { const hh = Math.floor(h) % 24, mm = Math.floor((h - Math.floor(h)) * 60); return num(String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0')); };
 function updateHero() {
-  if (!exp) return;
-  const step = exp.step, pos = exp.pos;
-  $$('#chapters .chap').forEach((c, i) => c.classList.toggle('on', i === step && Math.abs(pos - i) < 0.25 && exp.shopT < 0.4));
+  if (!HV.on && !exp) return;
+  const step = HV.on ? HV.step : exp.step, pos = HV.on ? HV.pos : exp.pos, st = exp ? exp.shopT : shopTv();
+  $$('#chapters .chap').forEach((c, i) => c.classList.toggle('on', i === step && Math.abs(pos - i) < 0.25 && st < 0.4));
   $$('#dots button').forEach((b, i) => { b.classList.toggle('on', i === step); b.setAttribute('aria-current', i === step ? 'true' : 'false'); });
   $('#progressBar').style.width = (pos / 4 * 100).toFixed(1) + '%';
-  $('#cue').classList.toggle('hide', step > 0 || pos > 0.04 || exp.shopT > 0.05);
-  const h = exp.hourNow;
+  $('#cue').classList.toggle('hide', step > 0 || pos > 0.04 || st > 0.05);
+  const h = HV.on && st < 0.02 ? hourOfPos(pos) : exp ? exp.hourNow : hourOfPos(pos);
   $('#clockT').textContent = fmtHour(h);
   const th = clamp((h - 5) / 15, 0, 1) * Math.PI, sun = $('#clockSun');
   sun.setAttribute('cx', (100 - 90 * Math.cos(th)).toFixed(1)); sun.setAttribute('cy', (100 - 90 * Math.sin(th)).toFixed(1));
   sun.setAttribute('fill', h < 5 || h > 20 ? '#bcc8ff' : h > 17 || h < 7 ? '#ffb070' : '#fff4d6');
-  $('#clock').style.opacity = String(clamp(1 - exp.shopT * 1.6, 0, 1));
+  $('#clock').style.opacity = String(clamp(1 - st * 1.6, 0, 1));
 }
+/* الفيديو يختفي حين يصير الكانفس الحي جاهزاً وننزل عن القمة (حالة المشهد الحي الابتدائية = نهاية الفيديو)؛ وهو مخفي نقفز به صامتاً إلى الأخيرة كي يتطابق عند العودة */
+function syncVideoStage() {
+  if (!HV.on) return;
+  const scrolled = window.scrollY > 2;
+  if (!exp) document.documentElement.style.setProperty('--st', shopTv().toFixed(3));
+  updateHero();
+  const off = scrolled && (HV.expReady || HV.noGL);
+  $('#hvStage').classList.toggle('off', off);
+  if (off && hv) { const want = HV.home ? 0 : 4; if (hv.stage !== want) hv.snap(want); } else if (!scrolled) HV.home = false;
+}
+window.addEventListener('scroll', () => syncVideoStage(), { passive: true });
 function scrollToShop() { sfx.whoosh(); document.getElementById('collection').scrollIntoView({ behavior: 'smooth' }); }
 
 /* ---------------------------------------------------------------- أدوات المتجر */
@@ -242,7 +267,7 @@ const hdr = $('#hdr');
 window.addEventListener('scroll', () => hdr.classList.toggle('solid', window.scrollY > 40), { passive: true });
 $$('#nav a, .logo').forEach((a) => a.addEventListener('click', (e) => {
   const h = a.getAttribute('href');
-  if (h === '#top') { e.preventDefault(); exp && exp.goStep(0, window.scrollY > innerHeight * 0.6); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  if (h === '#top') { e.preventDefault(); if (HV.on) { if (window.scrollY > 2) HV.home = true; else goHero(0); } else exp && exp.goStep(0, window.scrollY > innerHeight * 0.6); window.scrollTo({ top: 0, behavior: 'smooth' }); }
 }));
 $('#mail').addEventListener('submit', (e) => { e.preventDefault(); toast(T().contact.thanks); e.target.reset(); });
 
@@ -257,33 +282,95 @@ function observeReveal() {
 { const sc = $('#swatches'); let d = null; sc.addEventListener('pointerdown', (e) => { if (e.pointerType === 'mouse') d = { x: e.clientX, l: sc.scrollLeft }; }); window.addEventListener('pointermove', (e) => { if (d) { sc.scrollLeft = d.l - (e.clientX - d.x); } }); window.addEventListener('pointerup', () => { d = null; }); }
 
 /* ---------------------------------------------------------------- تشغيل */
+const expOpts = (videoHero) => ({
+  canvas: $('#gl'), heroEl: $('#hero'), shopEl: $('#collection'),
+  locked: () => document.body.classList.contains('modal-open') || $('#cart').classList.contains('on'),
+  sfx, videoHero,
+  onStep: () => updateHero(),
+  onFrame: () => { updateHero(); const n = exp.world.tod.night || 0; if (Math.abs(n - (UI.night || 0)) > 0.02) { UI.night = n; sfx.setNight(n); } },
+  onSelect: () => { UI.qty = exp.sel === 'dchair' ? exp.gal.dchair.opts.count : 1; fillPanel(UI.ready); UI.ready = true; },
+  onHover: (kind) => window.dispatchEvent(new CustomEvent('mhf-cursor', { detail: kind ? T().shop.cur[kind] || null : null })),
+  onShopT: (st) => {
+    document.documentElement.style.setProperty('--st', st.toFixed(3));
+    if (st > 0.45 && UI.auto && exp.sel !== autoPick()) exp.select(autoPick());
+  },
+  onLabels, onDims
+});
+/* بعد بناء المتجر الحي: مصغّرات حقيقية من المشهد وقيم اللوحة */
+function afterExp() {
+  for (const id of PRODUCT_ORDER) thumbs[id] = exp.snapshot(id, 170);
+  renderStatic();
+  window.__mhf = { exp, store, UI, sfx, thumbs, hv, HV };
+  $('#hourR').value = exp.shopHour; $('#hourT').textContent = fmtHour(exp.shopHour);
+  setAccent(STYLES[0].accent);
+}
+
 async function start() {
   const lbar = $('#loaderBar');
   store = initStore({ T, lang: () => lang, CONTENT: window.CONTENT, money, num, sfx, unitPrice, configLabel });
   renderStatic();
   const showUI = () => { lbar.style.width = '100%'; setTimeout(() => { $('#loader').classList.add('done'); document.body.classList.remove('is-loading'); }, 450); };
+  const saveData = !!(navigator.connection && navigator.connection.saveData);
+  if (!reduce && !saveData && !/[?&]live3d\b/.test(location.search)) {
+    try { await startVideoHero(lbar, showUI); return; } catch (err) { console.warn('Video hero unavailable, using the live 3D hero', err); fallbackToLive(); }
+  }
+  await startLive3D(lbar, showUI);
+}
+
+/* ------------------------------------------------ الهيرو كفيديو (الأساس): وقفات اليوم الخمس فيديو، والمشهد الحي يتولى المتجر */
+async function startVideoHero(lbar, showUI) {
+  const { initHeroVideo } = await import('./hero-video.js');
+  const stage = $('#hvStage'), vid = $('#hv');
+  HV.on = true; document.documentElement.classList.add('hv-on');
+  let vOk = false, eOk = false, shown = false, fillV = 0, fillE = 0;
+  const bar = () => { lbar.style.width = Math.round(((vOk ? 1 : fillV) * 0.5 + fillE * 0.5) * 100) + '%'; };
+  const reveal = () => { if (shown) return; shown = true; window.__ready = true; showUI(); };
+  const tryShow = () => { if (vOk && eOk) reveal(); };
+  hv = initHeroVideo({
+    hero: $('#hero'), stick: stage, video: vid, reduced: false, saveData: false, virtual: true,
+    stops: [0, 4.2, 8.4, 12.6, 16.6],
+    srcDesktop: 'assets/hero/hero-desktop.mp4', srcPhone: 'assets/hero/hero-phone.mp4', srcDesktopRev: 'assets/hero/hero-desktop-rev.mp4', srcPhoneRev: 'assets/hero/hero-phone-rev.mp4',
+    mobileQuery: '(max-width: 860px)', rate: 2, locked: isLocked,
+    onGo: () => sfx.whoosh(),
+    onPos: (p) => {
+      HV.pos = p; HV.step = Math.round(p);
+      const n = nightOf(hourOfPos(p)); if (Math.abs(n - (UI.night || 0)) > 0.02) { UI.night = n; sfx.setNight(n); }
+      updateHero();
+    },
+    onReady: () => { vOk = true; bar(); tryShow(); },
+    onFail: () => { fallbackToLive(); reveal(); }
+  });
+  vid.addEventListener('progress', () => { try { const b = vid.buffered; if (b.length && vid.duration) { fillV = Math.min(0.95, b.end(b.length - 1) / vid.duration); bar(); } } catch (e) {} });
+  window.__mhf = { exp: null, store, UI, sfx, hv, HV, thumbs };
+  hv.load(); updateHero();
+  setTimeout(reveal, 9000);
+  /* المتجر الحي يُبنى بالتوازي خلف شاشة التحميل كي لا يتقطع الفيديو لاحقاً */
   try {
-    exp = new Experience({
-      canvas: $('#gl'), heroEl: $('#hero'), shopEl: $('#collection'),
-      locked: () => document.body.classList.contains('modal-open') || $('#cart').classList.contains('on'),
-      sfx,
-      onStep: () => updateHero(),
-      onFrame: () => { updateHero(); const n = exp.world.tod.night || 0; if (Math.abs(n - (UI.night || 0)) > 0.02) { UI.night = n; sfx.setNight(n); } },
-      onSelect: () => { UI.qty = exp.sel === 'dchair' ? exp.gal.dchair.opts.count : 1; fillPanel(UI.ready); UI.ready = true; },
-      onHover: (kind) => window.dispatchEvent(new CustomEvent('mhf-cursor', { detail: kind ? T().shop.cur[kind] || null : null })),
-      onShopT: (st) => {
-        document.documentElement.style.setProperty('--st', st.toFixed(3));
-        if (st > 0.45 && UI.auto && exp.sel !== autoPick()) exp.select(autoPick());
-      },
-      onLabels, onDims
-    });
+    exp = new Experience(expOpts(true));
+    await exp.init((f) => { fillE = f; bar(); });
+    afterExp(); HV.expReady = true; syncVideoStage();
+  } catch (err) {
+    console.warn('WebGL unavailable, the shop uses the static fallback', err);
+    document.documentElement.classList.add('no-gl'); exp = null; HV.noGL = true; syncVideoStage();
+  }
+  eOk = true; fillE = 1; bar(); tryShow();
+}
+
+/* الفيديو فشل بعد البدء: نرجع للهيرو الحي (المشهد الثلاثي الأبعاد محفوظ كاملاً) */
+function fallbackToLive() {
+  HV.on = false; hv = null; document.documentElement.classList.remove('hv-on');
+  const st = $('#hvStage'); st && (st.hidden = true);
+  if (exp) { exp.o.videoHero = false; exp.vOn = true; exp.applyRun(); exp.goStep(0, true); setTimeout(() => exp.intro(), 300); }
+  updateHero();
+}
+
+/* ------------------------------------------------ الهيرو الحي القديم (محفوظ: ?live3d أو حركة أقل أو توفير بيانات أو فشل الفيديو) */
+async function startLive3D(lbar, showUI) {
+  if (exp) { showUI(); return; }                                  // بُني أصلاً (حالة فشل الفيديو بعد بدء المتجر)
+  try {
+    exp = new Experience(expOpts(false));
     await exp.init((f) => { lbar.style.width = Math.round(f * 100) + '%'; });
-    // مصغّرات حقيقية من المشهد
-    for (const id of PRODUCT_ORDER) thumbs[id] = exp.snapshot(id, 170);
-    renderStatic();
-    window.__mhf = { exp, store, UI, sfx, thumbs };
-    $('#hourR').value = exp.shopHour; $('#hourT').textContent = fmtHour(exp.shopHour);
-    setAccent(STYLES[0].accent);
+    afterExp();
     showUI();
     setTimeout(() => exp.intro(), 650);
     window.__ready = true;
@@ -295,5 +382,5 @@ async function start() {
     show(); $$('#dots button').forEach((b) => b.addEventListener('click', () => { step = +b.getAttribute('data-i-dot'); show(); }));
   }
 }
-function autoPick() { const s = exp.step; return s <= 1 ? 'sofa' : s === 2 ? 'table' : 'bed'; }
+function autoPick() { const s = HV.on ? HV.step : exp.step; return s <= 1 ? 'sofa' : s === 2 ? 'table' : 'bed'; }
 document.fonts && document.fonts.ready ? document.fonts.ready.then(start) : start();

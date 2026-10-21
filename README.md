@@ -1,30 +1,38 @@
-# MOHAMMED · Mobilia (concept)
+# موبيليا محمد · MOHAMMED Mobilia (مشروع تصميمي)
 
-A fictional furniture brand shown as a **live 3D gallery**: the sun moves as you scroll, every piece builds itself, and the whole store re-dresses in real time. A portfolio / sales concept for furniture makers: *your catalogue, alive in 3D.*
+موقع أثاث مفترض (علامة وهمية) مبني بالكامل بالثلاثي الأبعاد الحيّ، ومصمَّم ليكون عرضاً لأصحاب مصانع الأثاث (بورصة/إينيغول): **كتالوجكم يعيش بالـ3D**.
 
-**Live:** https://housinasaad-creator.github.io/mohammed-furniture-site/ (add `?lang=tr` for Turkish)
+**الفكرة:** "يوم في بيت محمد": التمرير = مرور اليوم (الفجر ← الصباح ← الظهيرة ← الغروب ← الليل). الشمس تعبر خلف نوافذ مقوّسة (القوس هو شعار العلامة) فتزحف بقع الضوء وظلال الأقواس على أرضية ترافرتين عاكسة، والمصابيح تشتعل عند الغروب، والصوت عصافير نهاراً وصراصير ليلاً.
 
-## The idea: "A day at Mohammed's"
-Scroll and a whole day passes: dawn, morning, noon, golden hour, night. The sun crosses arched windows (the arch is also the logo), long patches of light and arch-shaped shadows crawl across a reflective travertine floor, lamps ignite at dusk, and the sound is birds by day and crickets by night.
+## ما يميّزه
+- **القطع تبني نفسها**: عند وصول الكاميرا لكل غرفة تتجمّع الأريكة والطاولة والسرير من أجزائها (أرجل، هيكل، إسفنج، وسائد...).
+- **إعادة طلاء حيّة**: تغيير القماش/الخشب/الحجر يمرّر حلقة ضوء تُعيد كسوة القطعة، وأنماط البيت الأربعة (رمل، واحة، ليل، وردي طيني) تُلبس البيت كله بموجة واحدة.
+- **التفكيك (Anatomy)** مع مسمّيات، و**الأبعاد (Dimensions)** بالسنتيمتر، و**اسحب الشمس** بشريط الضوء.
+- متجر كامل: خيارات حيّة (مقاس/خشب/قماش/رخام) وأسعار تتحدّث، سلة بلقطة حقيقية للقطعة بإعدادها، دفع تجريبي (بطاقات الاختبار فقط).
+- ثلاث لغات: English، **Türkçe**، العربية (بدون قلب الاتجاه). افتراضياً تُختار لغة المتصفح؛ للرابط التركي أضف `?lang=tr`.
+- يعمل على الهاتف: تركيب عمودي، لوحة سفلية، جيروسكوب لتحريك الزاوية، وجودة تتكيّف تلقائياً.
 
-## What makes it different
-- **Pieces build themselves**: sofa, dining set and bed assemble from their real parts when the camera arrives.
-- **Live re-dressing**: changing a fabric, wood or stone sends a ring of light across the piece; four home styles (Sand, Oasis, Noir, Clay Rosé) re-dress the whole house in one wave.
-- **Anatomy** (exploded view with labels), **Dimensions** in centimetres, and a **drag-the-sun** light slider.
-- A complete shop: live options and prices, a bag with a real snapshot of the configured piece, a demo checkout (test cards only).
-- Three languages (English, Türkçe, العربية) without flipping the layout.
-- Works on phones: portrait composition, bottom sheet, gyro parallax, and adaptive quality.
+## كل شيء مولَّد بالكود (بلا ملفات نماذج أو صور خامات)
+- three.js r172 (مضمّنة في `js/vendor`، بلا CDN).
+- الخامات (خشب، جص، ترافرتين، بوكليه، قطيفة، كتّان، جلد، رخام، صوف) تُولَّد على كرت الشاشة ثم تُلوَّن بخريطة تدرّج.
+- أرائك منحنية بمسح مقطع حول قوس، ظهر سرير مخدّد يتبع القوس، أرجل طاولة على شكل قوس.
+- ظلال الشمس/القمر، انعكاس مستوي للأرضية، أعمدة ضوء حجمية وغبار، تألّق (bloom) وACES وحبيبات فيلم.
 
-## Everything is generated in code
-- three.js r172 vendored in `js/vendor` (no CDN, no model files, no texture images).
-- GPU-generated textures (wood, plaster, travertine, bouclé, velvet, linen, leather, marble, wool) tinted by gradient maps.
-- Curved sofas by sweeping a profile along an arc, an arch-following channel headboard, arch-shaped table legs.
-- Sun/moon shadows, planar floor reflection, volumetric light shafts and dust, bloom, ACES tone mapping and film grain.
+## تشغيل محلي
+انقر مرتين على `run-site.bat` (يشغّل خادماً على المنفذ 3500 ويفتح كروم). يحتاج خادماً لأن الموقع يستخدم وحدات ES وimportmap.
 
-## Run locally
-Serve the folder over HTTP (ES modules + import map need a server), for example `python -m http.server 3500`, then open http://127.0.0.1:3500/.
+## هيكل المجلد
+- `index.html`, `css/`, `js/` (الواجهة: `app.js`، السلة: `store.js`، النصوص: `content.js`، الكتالوج والأسعار: `catalog.js`).
+- `js/gl/`: `core.js` (العالم والإضاءة)، `gallery.js` (المعرض والمناطق)، `furniture.js` (القطع)، `decor.js`، `outdoors.js` (سماء وأعمدة ضوء)، `materials.js` + `texgen.js` (الخامات)، `post.js`، `experience.js` (الكاميرا والتفاعل)، `sfx.js`.
+- `dev.html` + `js/dev.js`: صفحة اختبار للّقطات (`?cam=x,y,z,tx,ty,tz&hour=..&zones=..`).
 
-## Notes
-Concept project: the brand, products and reviews are fictional, the 3D models are generated in code, and the checkout is a demo that sends nothing anywhere (known test cards only).
+## للتعديل لاحقاً
+- زر "لنتحدث عن كتالوجكم" في قسم أصحاب المصانع مخفي حتى تضع رابط التواصل (واتساب/لينكدإن/بريد) في آخر `js/content.js` داخل `window.CONTACT_URL`.
+- الألوان والخامات والأنماط: `js/gl/data.js`. الأسعار والخيارات: `js/catalog.js`.
 
-Designed & developed by Muhammed Elhuseyin.
+## ملاحظات صدق
+علامة ومنتجات وآراء وهمية. النماذج مولّدة بالكود. الدفع تجريبي بالكامل ولا يرسل شيئاً لأي مكان (يقبل بطاقات الاختبار المعروفة فقط).
+
+
+## الهيرو كفيديو (2026-10-21)
+وقفات اليوم الخمس (الفجر ← الليل) فيديو مُصوَّر مسبقاً بدقة عالية (assets/hero، المحرّك js/hero-video.js، أربع تمريرات + فيديو معكوس للرجوع السلس)، والمشهد الحي (WebGL) يعمل للمتجر تحته فقط. الهيرو الحي القديم محفوظ كاملاً في js/gl وjs/app.js: افتح الموقع مع `?live3d` لتشغيله (ويُستعمل تلقائياً مع تقليل الحركة/توفير البيانات/فشل الفيديو). النسخة قبل التعديل: _backup_before_video_hero.

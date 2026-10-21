@@ -32,6 +32,15 @@ html[lang="ar"] [data-i], html[lang="ar"] .tag, html[lang="ar"] .pname, html[lan
 
 #gl { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; background: #14100c; touch-action: pan-y; }
 
+/* الهيرو فيديو: طبقة ثابتة فوق الكانفس تختفي بتلاشٍ حين نغادر قمة الصفحة والكانفس الحي جاهز (حالته الابتدائية = آخر لقطة في الفيديو فلا قفزة) */
+.hv-stage { display: none; position: fixed; inset: 0; z-index: 0; background: #14100c; pointer-events: none; transition: opacity .38s ease, visibility 0s linear 0s; }
+html.hv-on .hv-stage { display: block; }
+.hv-stage[hidden] { display: none !important; }
+.hv-stage.off { opacity: 0; visibility: hidden; transition: opacity .38s ease, visibility 0s linear .38s; }
+.hv-stage .hv, .hv-stage .hv-poster, .hv-stage .hv-poster img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: cover; }
+.hv-stage .hv-poster { z-index: 1; transition: opacity .9s var(--ease) .1s; }
+.hv-stage.on3d .hv-poster { opacity: 0; }
+
 /* ------------------------------------------------------------ loader */
 .loader { position: fixed; inset: 0; z-index: 400; display: grid; place-content: center; justify-items: center; gap: 22px;
   background: radial-gradient(circle at 50% 45%, #2a1d14 0%, #14100c 72%); transition: opacity 1s ease, visibility 1s; }
@@ -298,5 +307,6 @@ html[lang="ar"] .tool-b { letter-spacing: 0; font-size: .86rem; text-transform: 
 
 /* بدون WebGL */
 html.no-gl #gl { display: none; }
+html.hv-on.no-gl .hero::before { display: none; }
 html.no-gl body { background: radial-gradient(70% 60% at 60% 40%, rgba(var(--accent-rgb), .25), #14100c 70%); }
 html.no-gl .hero::before { content: ""; position: absolute; right: 8vw; top: 16vh; width: min(40vw, 420px); aspect-ratio: 113 / 60; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 113 60'%3E%3Cpath fill='%23cba24f' fill-rule='evenodd' d='M0 60V32.5A32.5 32.5 0 0 1 56.5 10.6A32.5 32.5 0 0 1 113 32.5V60ZM17 60V32.5A15.5 15.5 0 0 1 48 32.5V60ZM65 60V32.5A15.5 15.5 0 0 1 96 32.5V60Z'/%3E%3C/svg%3E") center / contain no-repeat; filter: drop-shadow(0 0 30px rgba(203, 162, 79, .5)); }
