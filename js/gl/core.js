@@ -48,7 +48,7 @@ export class World {
     const r = this.renderer;
     r.outputColorSpace = THREE.LinearSRGBColorSpace; r.toneMapping = THREE.NoToneMapping;
     r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFSoftShadowMap; r.shadowMap.autoUpdate = false;
-    this.quality = { dpr: Math.min(window.devicePixelRatio || 1, this.mobile ? 1.6 : 2), shadow: this.mobile ? 2048 : 4096, refl: this.mobile ? 0 : 0.5, level: 0 };
+    this.quality = { dpr: Math.min(window.devicePixelRatio || 1, this.mobile ? 1.25 : 1.5), shadow: this.mobile ? 1024 : 2048, refl: this.mobile ? 0 : 0.35, level: 0 };
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(30, 1, 0.1, 400);
     this.scene.add(this.camera);

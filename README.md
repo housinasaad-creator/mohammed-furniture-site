@@ -33,6 +33,5 @@
 ## ملاحظات صدق
 علامة ومنتجات وآراء وهمية. النماذج مولّدة بالكود. الدفع تجريبي بالكامل ولا يرسل شيئاً لأي مكان (يقبل بطاقات الاختبار المعروفة فقط).
 
-
-## الهيرو كفيديو (2026-10-21)
-وقفات اليوم الخمس (الفجر ← الليل) فيديو مُصوَّر مسبقاً بدقة عالية (assets/hero، المحرّك js/hero-video.js، أربع تمريرات + فيديو معكوس للرجوع السلس)، والمشهد الحي (WebGL) يعمل للمتجر تحته فقط. الهيرو الحي القديم محفوظ كاملاً في js/gl وjs/app.js: افتح الموقع مع `?live3d` لتشغيله (ويُستعمل تلقائياً مع تقليل الحركة/توفير البيانات/فشل الفيديو). النسخة قبل التعديل: _backup_before_video_hero.
+## Hero: live 3D again (2026-10-22)
+The hero is the live 3D scene again, a little lighter (lower resolution cap, fewer particles, simpler parts) and released from memory when far away. Devices with 4 cores or fewer, or 2 GB of RAM or less, skip the 3D hero: it becomes one still screen so the first scroll leaves it. Add `?hero=on` or `?hero=off` to force either way. The pre-rendered video version of the hero is kept in `_video_hero_version` (not deployed).
