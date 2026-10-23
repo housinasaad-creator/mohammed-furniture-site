@@ -23,6 +23,7 @@ const HERO = [
   { zone: 3, cam: [26.9, 1.15, 5.0], tgt: [28.1, 0.9, -1.45], fov: 30, hour: 22.3 }
 ];
 const LAST = HERO.length - 1;
+export const HERO_HOURS = HERO.map((h) => h.hour);
 const DUR = 2600;
 
 /* لقطات المتجر: مسافة، ارتفاع، زاوية، ارتفاع الهدف */
@@ -53,12 +54,15 @@ export class Experience {
     this.curKind = null; this.hover = null;
     this._cp = new V3(); this._ct = new V3();
     this.styleIndex = 0;
+    /* هيرو الفيديو: الوقفات الخمس فيديو مُصوَّر مسبقاً (js/hero-video.js) والمشهد الحي يبدأ من حالة نهاية اليوم (كل المناطق مبنية، الليل)؛ ولا يرسم ما دام الفيديو ظاهراً (قمة الصفحة) */
+    this.vOn = !o.videoHero;
+    if (o.videoHero) { this.step = this.pos = LAST; this.hourNow = HERO[LAST].hour; this.introStart = performance.now() - 9999; }
   }
   get mobile() { return this.mql.matches; }
 
   async init(progress) {
     const canvas = this.o.canvas;
-    const mobile = this.mobile || this.o.lite || /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
+    const mobile = this.mobile || /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
     this.world = new World(canvas, { mobile, preserve: this.o.preserve });
     progress && progress(0.1);
     await new Promise((r) => setTimeout(r, 30));
@@ -66,7 +70,7 @@ export class Experience {
     progress && progress(0.55);
     await new Promise((r) => setTimeout(r, 30));
     this.world.fade = 0; this.world.fadeTarget = 0;
-    this.world.setHour(HERO[0].hour, true);
+    this.world.setHour(HERO[this.step].hour, true);
     this.bindInput(canvas);
     this.world.onFrame((dt, t) => this.update(dt, t));
     window.addEventListener('scroll', () => this.onScroll(), { passive: true });
@@ -78,15 +82,25 @@ export class Experience {
       const io = new IntersectionObserver((es) => {
         es.forEach((e) => vis.set(e.target, e.isIntersecting));
         const on = [...vis.values()].some(Boolean);
-        if (on !== this.active) { this.active = on; on ? this.world.start() : this.world.stop(); }
+        if (on !== this.active) { this.active = on; this.applyRun(); }
       }, { threshold: 0 });
       watch.forEach((el) => io.observe(el));
     }
     this.camSetup(0);
     this.warm();
+    if (this.o.videoHero) this.buildAll();
     progress && progress(0.95);
-    this.world.start();
+    this.applyRun();
     return this;
+  }
+  /* الرسم يعمل فقط حين يكون الكانفس ظاهراً: قسم المتجر مرئي، وفي وضع هيرو الفيديو أيضاً بعد مغادرة قمة الصفحة */
+  applyRun() { const run = this.active && this.vOn; run ? this.world.start() : this.world.stop(); }
+  /* كل المناطق مبنية فوراً كما تكون بعد أن يمرّ الزائر بالرحلة كلها (الفيديو أظهر البناء) */
+  buildAll() {
+    const g = this.gal, w = this.world;
+    g.zones.forEach((z) => { z.built = true; g.setZoneBuilt(z, 1); });
+    g.anim.length = 0; g.logoAnim = null; g.logo.position.y = 0.42; g.logo.scale.setScalar(1);
+    w.fade = 1; w.fadeTarget = 1;
   }
 
   /* تجميع الشيدرات مسبقاً كي لا يحدث تقطيع عند أول ظهور */
@@ -119,7 +133,7 @@ export class Experience {
       if (Math.abs(dy) < 2) return;
       // في المتجر: عجلة الماوس فوق المشهد تقرّب/تبعّد قليلاً
       if (this.shopT > 0.85 && e.target && e.target.id === 'gl' && !e.shiftKey) { this.userZoom = clamp(this.userZoom + dy * 0.0014, -0.35, 0.35); }
-      if (this.o.skipHero) return;                       // جهاز ضعيف: بلا وقفات للهيرو، السكرول الأول يدخل المتجر
+      if (this.o.videoHero) return;                      // وقفات الهيرو يديرها محرّك الفيديو
       if (window.scrollY > 2 || this.o.locked?.()) { consumed = true; return; }
       const down = dy > 0;
       if (this.busy()) { e.preventDefault(); owned = true; consumed = true; return; }
@@ -135,7 +149,7 @@ export class Experience {
     let tY = 0, tX = 0, tTop = false, tDone = false;
     window.addEventListener('touchstart', (e) => { const t = e.touches[0]; tY = t.clientY; tX = t.clientX; tTop = window.scrollY <= 2; tDone = false; }, { passive: true });
     window.addEventListener('touchmove', (e) => {
-      if (this.o.skipHero) return;
+      if (this.o.videoHero) return;
       if (!tTop || e.touches.length > 1 || window.scrollY > 2 || this.o.locked?.()) return;
       const t = e.touches[0], dy = tY - t.clientY, dx = tX - t.clientX;
       if (Math.abs(dy) < 6 || Math.abs(dy) < Math.abs(dx)) return;
@@ -156,7 +170,7 @@ export class Experience {
         else if (k === 'ArrowLeft') { this.select(PRODUCT_ORDER[(i + PRODUCT_ORDER.length - 1) % PRODUCT_ORDER.length]); e.preventDefault(); }
         return;
       }
-      if (window.scrollY > 2 || this.o.skipHero) return;
+      if (window.scrollY > 2 || this.o.videoHero) return;
       const down = k === 'ArrowDown' || k === 'PageDown' || k === ' ', up = k === 'ArrowUp' || k === 'PageUp';
       if (!down && !up) return;
       if (!this.busy() && ((down && this.step >= LAST) || (up && this.step <= 0))) return;
@@ -242,6 +256,7 @@ export class Experience {
     const vh = window.innerHeight;
     this.shopT = smooth(clamp(window.scrollY / (vh * 0.9), 0, 1));
     this.o.onShopT && this.o.onShopT(this.shopT);
+    if (this.o.videoHero && this.world) { const on = window.scrollY > 2; if (on !== this.vOn) { this.vOn = on; this.applyRun(); } }
     // إذا توقف التمرير بين الهيرو والمتجر نُكمل باتجاه حركة المستخدم (كي لا تبقى الواجهة في منتصف الطريق)
     const y = window.scrollY, dy = y - (this._lastY || 0); this._lastY = y;
     if (Math.abs(dy) > 0.5) this._dir = dy > 0 ? 1 : -1;
