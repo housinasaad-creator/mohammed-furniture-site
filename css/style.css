@@ -310,3 +310,6 @@ html.no-gl #gl { display: none; }
 html.hv-on.no-gl .hero::before { display: none; }
 html.no-gl body { background: radial-gradient(70% 60% at 60% 40%, rgba(var(--accent-rgb), .25), #14100c 70%); }
 html.no-gl .hero::before { content: ""; position: absolute; right: 8vw; top: 16vh; width: min(40vw, 420px); aspect-ratio: 113 / 60; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 113 60'%3E%3Cpath fill='%23cba24f' fill-rule='evenodd' d='M0 60V32.5A32.5 32.5 0 0 1 56.5 10.6A32.5 32.5 0 0 1 113 32.5V60ZM17 60V32.5A15.5 15.5 0 0 1 48 32.5V60ZM65 60V32.5A15.5 15.5 0 0 1 96 32.5V60Z'/%3E%3C/svg%3E") center / contain no-repeat; filter: drop-shadow(0 0 30px rgba(203, 162, 79, .5)); }
+
+/* الهيرو فيديو دائر بلا وقفات (js/hero-video.js): لا نقاط ولا شريط تقدّم ولا ساعة لأنها تتبع وقفات لم تعد موجودة */
+html.hv-on .dots, html.hv-on .progress, html.hv-on .clock { display: none; }
